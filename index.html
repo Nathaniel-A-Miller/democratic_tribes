@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What kind of Democrat are you?</title>
+  <meta name="description" content="Nine questions based on survey data from 19,000 Democrats. Find out which of the four Democratic tribes you belong to." />
+
+  <meta property="og:title" content="What kind of Democrat are you?" />
+  <meta property="og:description" content="Nine questions based on survey data from 19,000 Democrats. Find your tribe." />
+  <meta property="og:type" content="website" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f9f9f7;
+      color: #1a1a18;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 0.5px solid #d3d1c7;
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .intro-title { font-size: 22px; font-weight: 500; margin-bottom: 8px; }
+    .intro-sub { font-size: 14px; color: #5f5e5a; margin-bottom: 6px; line-height: 1.6; }
+    .source { font-size: 11px; color: #888780; margin-top: 12px; }
+
+    .progress-bar { height: 3px; background: #f1efe8; border-radius: 2px; margin-bottom: 1.5rem; }
+    .progress-fill { height: 3px; border-radius: 2px; background: #534AB7; transition: width 0.3s; }
+
+    .q-header { font-size: 12px; color: #888780; margin-bottom: 1rem; letter-spacing: 0.05em; }
+    .q-text { font-size: 17px; font-weight: 500; margin-bottom: 1.25rem; line-height: 1.5; }
+
+    .opt {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 12px 16px 12px 13px;
+      margin-bottom: 8px;
+      background: #ffffff;
+      border-top: 0.5px solid #d3d1c7;
+      border-right: 0.5px solid #d3d1c7;
+      border-bottom: 0.5px solid #d3d1c7;
+      border-left: 4px solid transparent;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #1a1a18;
+      cursor: pointer;
+      line-height: 1.45;
+      font-family: inherit;
+      transition: background 0.1s;
+    }
+    .opt:hover { background: #f1efe8; }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.25rem;
+    }
+
+    .btn-next {
+      padding: 10px 24px;
+      background: #534AB7;
+      color: #EEEDFE;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      opacity: 0.35;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      font-family: inherit;
+    }
+    .btn-next.ready { opacity: 1; pointer-events: auto; }
+
+    .btn-back {
+      font-size: 13px;
+      color: #888780;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 0;
+      font-family: inherit;
+    }
+    .btn-back:hover { color: #1a1a18; }
+
+    .btn-start {
+      padding: 12px 32px;
+      background: #534AB7;
+      color: #EEEDFE;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 1rem;
+    }
+    .btn-start:hover { background: #3C3489; }
+
+    .result-tribe { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
+    .result-share-line { font-size: 13px; color: #888780; margin-bottom: 1.5rem; }
+
+    .figureheads { display: flex; gap: 12px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .fhead {
+      flex: 1;
+      min-width: 140px;
+      background: #f9f9f7;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 500; flex-shrink: 0;
+    }
+    .fhead-name { font-size: 13px; font-weight: 500; color: #1a1a18; }
+    .fhead-role { font-size: 11px; color: #888780; margin-top: 2px; }
+
+    .traits { margin-bottom: 1.5rem; }
+    .trait {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 6px 0;
+      border-bottom: 0.5px solid #f1efe8;
+      font-size: 13px; color: #5f5e5a; line-height: 1.5;
+    }
+    .trait:last-child { border-bottom: none; }
+    .trait-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+
+    .radar-wrap { margin-bottom: 1.5rem; }
+    .radar-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; justify-content: center; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #888780; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    .share-buttons { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .btn-share {
+      flex: 1;
+      min-width: 100px;
+      padding: 10px 12px;
+      border: 0.5px solid #d3d1c7;
+      border-radius: 8px;
+      background: #ffffff;
+      font-size: 13px;
+      font-weight: 500;
+      color: #1a1a18;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: center;
+    }
+    .btn-share:hover { background: #f1efe8; }
+
+    .btn-retake {
+      padding: 10px 24px;
+      background: none;
+      border: 0.5px solid #d3d1c7;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #888780;
+      cursor: pointer;
+      width: 100%;
+      font-family: inherit;
+      margin-top: 4px;
+    }
+    .btn-retake:hover { background: #f1efe8; }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #1a1a18; color: #f1efe8; }
+      .card { background: #2c2c2a; border-color: #444441; }
+      .opt { background: #2c2c2a; border-top-color: #444441; border-right-color: #444441; border-bottom-color: #444441; color: #f1efe8; }
+      .opt:hover { background: #444441; }
+      .progress-bar { background: #444441; }
+      .fhead { background: #1a1a18; }
+      .fhead-name { color: #f1efe8; }
+      .btn-share { background: #2c2c2a; border-color: #444441; color: #f1efe8; }
+      .btn-share:hover { background: #444441; }
+      .btn-retake { border-color: #444441; }
+      .btn-retake:hover { background: #444441; }
+      .trait { border-bottom-color: #444441; }
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <div id="intro" class="screen active">
+    <p class="intro-title">What kind of Democrat are you?</p>
+    <p class="intro-sub">Nine questions based on survey data from 19,000 Democrats. Based on research by The Economist and the Cooperative Election Study.</p>
+    <button class="btn-start" onclick="startQuiz()">Start</button>
+    <p class="source">Source: The Economist / YouGov Cooperative Election Study, 2024</p>
+  </div>
+
+  <div id="quiz" class="screen">
+    <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+    <p class="q-header" id="q-num"></p>
+    <p class="q-text" id="q-text"></p>
+    <div id="opts"></div>
+    <div class="nav">
+      <button class="btn-back" id="btn-back" onclick="goBack()">Back</button>
+      <button class="btn-next" id="btn-next" onclick="goNext()">Next</button>
+    </div>
+  </div>
+
+  <div id="result" class="screen">
+    <p class="result-tribe" id="res-tribe"></p>
+    <p class="result-share-line" id="res-share"></p>
+    <div class="figureheads" id="res-fheads"></div>
+    <div class="traits" id="res-traits"></div>
+    <div class="radar-wrap">
+      <div style="position:relative;width:100%;height:260px">
+        <canvas id="radarChart" role="img" aria-label="Radar chart showing scores across four Democratic tribes"></canvas>
+      </div>
+      <div class="radar-legend" id="radar-legend"></div>
+    </div>
+    <div class="share-buttons">
+      <button class="btn-share" onclick="shareToBluesky()">Share on Bluesky</button>
+      <button class="btn-share" onclick="shareToX()">Share on X</button>
+      <button class="btn-share" onclick="shareToLinkedIn()">Share on LinkedIn</button>
+    </div>
+    <button class="btn-retake" onclick="retake()">Retake quiz</button>
+  </div>
+
+</div>
+
+<script>
+const PAGE_URL = window.location.href.split('?')[0];
+
+const TRIBES = {
+  progressive: {
+    name: 'Progressive',
+    share: '40% of Democrats',
+    color: '#534AB7',
+    figureheads: [
+      {initials:'BS', name:'Bernie Sanders', role:'Senator, Vermont', bg:'#EEEDFE', fg:'#3C3489'},
+      {initials:'AO', name:'Alexandria Ocasio-Cortez', role:'Congresswoman, New York', bg:'#EEEDFE', fg:'#3C3489'}
+    ],
+    traits: [
+      'Youngest and most highly educated bloc',
+      'Strongest support for wealth redistribution',
+      '98% agree white Americans enjoy "white privilege"',
+      'Most likely to back increased welfare, health, and education spending'
+    ]
+  },
+  establishment: {
+    name: 'Establishment Democrat',
+    share: '29% of Democrats',
+    color: '#1D9E75',
+    figureheads: [
+      {initials:'MK', name:'Mark Kelly', role:'Senator, Arizona', bg:'#E1F5EE', fg:'#085041'},
+      {initials:'GW', name:'Gretchen Whitmer', role:'Governor, Michigan', bg:'#E1F5EE', fg:'#085041'}
+    ],
+    traits: [
+      'Highest average age of any Democratic tribe',
+      'Shares progressive views on economics',
+      'Nearly 9-in-10 support more border patrols',
+      'About three-quarters oppose cuts to police funding'
+    ]
+  },
+  bootstrap: {
+    name: 'Bootstrap Democrat',
+    share: '18% of Democrats',
+    color: '#D85A30',
+    figureheads: [
+      {initials:'HC', name:'Henry Cuellar', role:'Congressman, Texas', bg:'#FAECE7', fg:'#712B13'},
+      {initials:'MG', name:'Marie Gluesenkamp Perez', role:'Congresswoman, Washington', bg:'#FAECE7', fg:'#712B13'}
+    ],
+    traits: [
+      'Most religious of the four tribes',
+      'Most skeptical of the "white privilege" framing',
+      'More optimistic about racial progress than other factions',
+      'Lowest share supporting abortion rights (68%), though still a majority'
+    ]
+  },
+  isolationist: {
+    name: 'Isolationist Democrat',
+    share: '13% of Democrats',
+    color: '#BA7517',
+    figureheads: [
+      {initials:'BL', name:'Barbara Lee', role:'Mayor of Oakland', bg:'#FAEEDA', fg:'#633806'},
+      {initials:'RK', name:'Ro Khanna', role:'Congressman, California', bg:'#FAEEDA', fg:'#633806'}
+    ],
+    traits: [
+      'Overwhelmingly female, with the highest share of Black and Hispanic supporters',
+      'Least likely to hold a college degree',
+      '77% oppose US involvement in Ukraine, 82% in Gaza',
+      'Aligns with Progressives on most domestic issues'
+    ]
+  }
+};
+
+const QUESTIONS = [
+  {text:'The government should significantly increase spending on welfare programs for low-income Americans.',scores:{progressive:3,establishment:1,bootstrap:1,isolationist:2}},
+  {text:'White Americans benefit from "white privilege" — structural advantages that Black and other minority Americans do not enjoy.',scores:{progressive:3,establishment:2,bootstrap:0,isolationist:2}},
+  {text:'On police funding, my view is:',opts:[
+    {text:'We should reduce police budgets and redirect funds to social services.',scores:{progressive:3,establishment:0,bootstrap:0,isolationist:2}},
+    {text:'Funding should stay roughly the same, with some reforms.',scores:{progressive:1,establishment:2,bootstrap:2,isolationist:1}},
+    {text:'We should increase police funding and resources.',scores:{progressive:0,establishment:3,bootstrap:3,isolationist:0}}
+  ]},
+  {text:'The US should secure the southern border with patrols and enforcement.',scores:{progressive:0,establishment:3,bootstrap:2,isolationist:1}},
+  {text:'The United States should continue providing military and financial support to Ukraine.',scores:{progressive:1,establishment:3,bootstrap:1,isolationist:0}},
+  {text:'The United States should continue its military and diplomatic involvement in the conflict in Gaza.',scores:{progressive:1,establishment:2,bootstrap:1,isolationist:0}},
+  {text:'Abortion should be legal and accessible in all or most cases.',scores:{progressive:3,establishment:3,bootstrap:1,isolationist:3}},
+  {text:'Addressing inequality is primarily the government\'s job — through redistribution, public programs, and structural reform.',scores:{progressive:3,establishment:2,bootstrap:1,isolationist:2}},
+  {text:'How important is religious faith in your life and political thinking?',opts:[
+    {text:'Not important at all — I\'m secular or non-religious.',scores:{progressive:2,establishment:1,bootstrap:0,isolationist:1}},
+    {text:'Somewhat important personally, but I keep it separate from politics.',scores:{progressive:1,establishment:2,bootstrap:1,isolationist:1}},
+    {text:'Important — my faith shapes my values and how I vote.',scores:{progressive:0,establishment:1,bootstrap:3,isolationist:1}}
+  ]}
+];
+
+const AGREE_OPTS = [
+  {text:'Strongly agree',    scores: m => scale(m,3)},
+  {text:'Somewhat agree',    scores: m => scale(m,2)},
+  {text:'Somewhat disagree', scores: m => scale(m,1)},
+  {text:'Strongly disagree', scores: m => scale(m,0)}
+];
+
+function scale(map, factor) {
+  const max = Math.max(...Object.values(map));
+  const r = {};
+  for (const k in map) r[k] = Math.round((map[k] / max) * factor);
+  return r;
+}
+
+let current = 0, answers = [], totals = {progressive:0,establishment:0,bootstrap:0,isolationist:0};
+let winnerKey = '';
+
+function startQuiz() { show('quiz'); renderQ(0); }
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function renderQ(idx) {
+  const q = QUESTIONS[idx];
+  document.getElementById('q-num').textContent = 'Question ' + (idx+1) + ' of ' + QUESTIONS.length;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('prog').style.width = ((idx / QUESTIONS.length) * 100) + '%';
+
+  const opts = q.opts ? q.opts : AGREE_OPTS.map(o => ({text: o.text, scores: o.scores(q.scores)}));
+  const container = document.getElementById('opts');
+  container.innerHTML = '';
+  const saved = answers[idx];
+
+  opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.textContent = opt.text;
+    if (saved === i) applySelected(btn);
+    btn.onclick = () => selectOpt(i, btn);
+    container.appendChild(btn);
+  });
+
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.textContent = idx === QUESTIONS.length - 1 ? 'See results' : 'Next';
+  nextBtn.classList.toggle('ready', saved !== undefined);
+  document.getElementById('btn-back').style.visibility = idx === 0 ? 'hidden' : 'visible';
+}
+
+function applySelected(btn) {
+  btn.style.borderLeft = '4px solid #534AB7';
+  btn.style.background = '#EEEDFE';
+  btn.style.color = '#3C3489';
+  btn.style.fontWeight = '500';
+}
+
+function clearSelected(btn) {
+  btn.style.borderLeft = '4px solid transparent';
+  btn.style.background = '';
+  btn.style.color = '';
+  btn.style.fontWeight = '';
+}
+
+function selectOpt(i, clicked) {
+  answers[current] = i;
+  document.querySelectorAll('.opt').forEach(b => clearSelected(b));
+  applySelected(clicked);
+  document.getElementById('btn-next').classList.add('ready');
+}
+
+function goNext() {
+  if (answers[current] === undefined) return;
+  current++;
+  if (current >= QUESTIONS.length) { calcResults(); return; }
+  renderQ(current);
+}
+
+function goBack() {
+  if (current === 0) return;
+  current--;
+  renderQ(current);
+}
+
+function calcResults() {
+  totals = {progressive:0, establishment:0, bootstrap:0, isolationist:0};
+  QUESTIONS.forEach((q, qi) => {
+    const ai = answers[qi];
+    const opts = q.opts ? q.opts : AGREE_OPTS.map(o => ({scores: o.scores(q.scores)}));
+    const s = opts[ai].scores;
+    for (const k in s) totals[k] += s[k];
+  });
+  winnerKey = Object.entries(totals).sort((a,b) => b[1]-a[1])[0][0];
+  showResult(winnerKey);
+}
+
+function showResult(winner) {
+  const t = TRIBES[winner];
+  document.getElementById('res-tribe').textContent = t.name;
+  document.getElementById('res-share').textContent = t.share + ' · based on Economist/YouGov data';
+
+  document.getElementById('res-fheads').innerHTML = t.figureheads.map(f =>
+    `<div class="fhead">
+      <div class="avatar" style="background:${f.bg};color:${f.fg}">${f.initials}</div>
+      <div><p class="fhead-name">${f.name}</p><p class="fhead-role">${f.role}</p></div>
+    </div>`
+  ).join('');
+
+  document.getElementById('res-traits').innerHTML = t.traits.map(trait =>
+    `<div class="trait"><span class="trait-dot" style="background:${t.color}"></span><span>${trait}</span></div>`
+  ).join('');
+
+  const max = Math.max(...Object.values(totals));
+  const norm = k => max > 0 ? Math.round((totals[k] / max) * 100) : 0;
+  const labels = ['Progressive', 'Establishment', 'Bootstrap', 'Isolationist'];
+  const keys   = ['progressive', 'establishment', 'bootstrap', 'isolationist'];
+  const colors = ['#534AB7', '#1D9E75', '#D85A30', '#BA7517'];
+
+  document.getElementById('radar-legend').innerHTML = labels.map((l,i) =>
+    `<span class="legend-item"><span class="legend-dot" style="background:${colors[i]}"></span>${l}</span>`
+  ).join('');
+
+  if (window._radarChart) window._radarChart.destroy();
+  window._radarChart = new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+      labels,
+      datasets: [{
+        data: keys.map(k => norm(k)),
+        backgroundColor: t.color + '22',
+        borderColor: t.color,
+        borderWidth: 2,
+        pointBackgroundColor: colors,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { display: false },
+          grid: { color: 'rgba(136,135,128,0.25)' },
+          angleLines: { color: 'rgba(136,135,128,0.25)' },
+          pointLabels: { font: { size: 12 }, color: '#888780' }
+        }
+      }
+    }
+  });
+
+  show('result');
+}
+
+function getShareText() {
+  const t = TRIBES[winnerKey];
+  return `I got "${t.name}" (${t.share}) on the Democratic tribes quiz. What are you? ${PAGE_URL}`;
+}
+
+function shareToBluesky() {
+  const url = 'https://bsky.app/intent/compose?text=' + encodeURIComponent(getShareText());
+  window.open(url, '_blank');
+}
+
+function shareToX() {
+  const url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(getShareText());
+  window.open(url, '_blank');
+}
+
+function shareToLinkedIn() {
+  const url = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(PAGE_URL);
+  window.open(url, '_blank');
+}
+
+function retake() {
+  current = 0; answers = []; winnerKey = '';
+  totals = {progressive:0, establishment:0, bootstrap:0, isolationist:0};
+  if (window._radarChart) { window._radarChart.destroy(); window._radarChart = null; }
+  show('intro');
+}
+</script>
+</body>
+</html>
