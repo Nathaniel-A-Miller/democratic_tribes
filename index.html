@@ -172,6 +172,10 @@
     }
     .btn-share:hover { background: #f1efe8; }
 
+    .data-charts { border-top: 0.5px solid #d3d1c7; padding-top: 1.25rem; margin-bottom: 1.5rem; }
+    .charts-heading { font-size: 12px; font-weight: 500; color: #888780; letter-spacing: 0.05em; margin-bottom: 12px; }
+    .charts-source { font-size: 11px; color: #888780; margin-top: 8px; }
+
     .btn-retake {
       padding: 10px 24px;
       background: none;
@@ -234,13 +238,18 @@
       </div>
       <div class="radar-legend" id="radar-legend"></div>
     </div>
-    <!--
+    <div class="data-charts">
+      <p class="charts-heading">The data behind the tribes</p>
+      <img src="demtribes_1.png" alt="Bubble chart showing the four Democratic tribes plotted by support for higher corporate taxes and border wall, with bubble size indicating share of Democratic voters" style="width:100%;border-radius:8px;margin-bottom:12px;display:block;" />
+      <img src="demtribes_2.png" alt="Dot plot showing agreement with domestic policy issues across the four Democratic tribes" style="width:100%;border-radius:8px;display:block;" />
+      <p class="charts-source">Sources: Co-operative Election Study; The Economist</p>
+    </div>
+
     <div class="share-buttons">
       <button class="btn-share" onclick="shareToBluesky()">Share on Bluesky</button>
       <button class="btn-share" onclick="shareToX()">Share on X</button>
       <button class="btn-share" onclick="shareToLinkedIn()">Share on LinkedIn</button>
     </div>
-    -->
     <button class="btn-retake" onclick="retake()">Retake quiz</button>
   </div>
 
@@ -259,11 +268,10 @@ const TRIBES = {
       {initials:'AO', name:'Alexandria Ocasio-Cortez', role:'Congresswoman, New York', bg:'#EEEDFE', fg:'#3C3489'}
     ],
     traits: [
-      'Largest, youngest, whitest grouping',
-      '56% are college-educated or higher',
+      'Youngest and most highly educated bloc',
+      'Strongest support for wealth redistribution',
       '98% agree white Americans enjoy "white privilege"',
-      'Pro social spending, tax rises on the rich',
-      'Average age: 45'
+      'Most likely to back increased welfare, health, and education spending'
     ]
   },
   establishment: {
@@ -275,11 +283,10 @@ const TRIBES = {
       {initials:'GW', name:'Gretchen Whitmer', role:'Governor, Michigan', bg:'#E1F5EE', fg:'#085041'}
     ],
     traits: [
-      'Oldest grouping',
-      'Most “governing coalition” grouping',
-      'Pro border patrols, police spending',
-      '90% support raising corporate tax rate',
-      'Average age: 58'
+      'Highest average age of any Democratic tribe',
+      'Shares progressive views on economics',
+      'Nearly 9-in-10 support more border patrols',
+      'About three-quarters oppose cuts to police funding'
     ]
   },
   bootstrap: {
@@ -291,11 +298,10 @@ const TRIBES = {
       {initials:'MG', name:'Marie Gluesenkamp Perez', role:'Congresswoman, Washington', bg:'#FAECE7', fg:'#712B13'}
     ],
     traits: [
-      'Most religious group',
-      'Lowest agreement for "white privilege"',
-      'Support increased police spending',
-      'Lowest share supporting abortion rights (70%)',
-      'Average age: 50'
+      'Most religious of the four tribes',
+      'Most skeptical of the "white privilege" framing',
+      'More optimistic about racial progress than other factions',
+      'Lowest share supporting abortion rights (68%), though still a majority'
     ]
   },
   isolationist: {
@@ -307,11 +313,10 @@ const TRIBES = {
       {initials:'RK', name:'Ro Khanna', role:'Congressman, California', bg:'#FAEEDA', fg:'#633806'}
     ],
     traits: [
-      '70% female, with the highest share of Black and Hispanic supporters',
+      'Overwhelmingly female, with the highest share of Black and Hispanic supporters',
       'Least likely to hold a college degree',
       '77% oppose US involvement in Ukraine, 82% in Gaza',
-      'Aligns with Progressives on most domestic issues',
-      'Average age: 47'
+      'Aligns with Progressives on most domestic issues'
     ]
   }
 };
